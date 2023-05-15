@@ -33,17 +33,20 @@ PROMPT = PromptTemplate(
 )
 
 question_restate = """Replace the entites mentioned in the question to one of these choices: {vertices}.
+                      Replace the relationships mentioned in the question to one of these choices: {edges}.
                       Generate the complete question with the appropriate replacements.
                       If there are no replacements to be made, restate the question.
                       Example: How many universities are there?
                       Response: How many vertices are University Vetexes?
                       Example: What is the schema?
                       Response: What is the schema?
+                      Example: How many transactions are there?
+                      Response: How many Transaction Edges are there?
                       QUESTION: {question}
                       RESTATED: """
 
 RESTATE_QUESTION_PROMPT = PromptTemplate(
-    template=question_restate, input_variables=["question", "vertices"]
+    template=question_restate, input_variables=["question", "vertices", "edges"]
 )
 
 llm = OpenAI(temperature=0, model_name="text-davinci-003")
@@ -52,13 +55,17 @@ chain = LLMChain(llm=llm, prompt=PROMPT)
 restate_chain = LLMChain(llm=llm, prompt=RESTATE_QUESTION_PROMPT)
 
 def generate_answer(question):
-    restate_q = restate_chain.apply([{"vertices": [x + " Vertex" for x in conn.getVertexTypes()],
-                                      "question": question}])[0]["text"]
+    restate_q = restate_chain.apply([{"vertices": [x + " Vertex" for x in conn.getVertexTypes()], # + [x + " Edge" for x in conn.getEdgeTypes()],
+                                      "question": question,
+                                      "edges": [x + " Edge" for x in conn.getEdgeTypes()]}])[0]["text"]
 
     print("RESTATED QUESTION:", restate_q)
 
-    docs = store.similarity_search(question, k=5)
-
+    docs = store.similarity_search(restate_q, k=5)
+    print()
+    for doc in docs:
+        print(doc)
+    print()
     inputs = [{"context": doc.page_content, 
                 "question": restate_q, 
                 "vertices": conn.getVertexTypes(), 
@@ -71,6 +78,7 @@ def generate_answer(question):
     generated = chain.apply(inputs)[0]["text"]
     loc = {}
     try:
+        print(generated)
         exec("res = conn."+generated, {"conn": conn}, loc)
         print(loc["res"])
     except Exception as e:
