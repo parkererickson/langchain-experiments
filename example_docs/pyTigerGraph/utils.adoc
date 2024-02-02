@@ -1,0 +1,156 @@
+= Utility Functions
+
+
+Utility functions for pyTigerGraph.
+All functions in this module are called as methods on a link:https://docs.tigergraph.com/pytigergraph/current/core-functions/base[`TigerGraphConnection` object].
+
+== echo()
+`echo(usePost: bool = False) -> str`
+
+Pings the database.
+
+[discrete]
+==== Parameter:
+* `usePost`: Use POST instead of GET
+
+[discrete]
+==== Returns:
+"Hello GSQL" if everything was OK.
+
+[discrete]
+==== Endpoint:
+- `GET /echo`
+- `POST /echo`
+See xref:tigergraph-server:API:built-in-endpoints.adoc#_echo[Echo]
+
+
+== getVersion()
+`getVersion(raw: bool = False) -> Union[str, list]`
+
+Retrieves the git versions of all components of the system.
+
+[discrete]
+==== Parameter:
+* `raw`: Return unprocessed version info string, or extract version info for each component
+into a list.
+
+[discrete]
+==== Returns:
+Either an unprocessed string containing the version info details, or a list with version
+info for each component.
+
+[discrete]
+==== Endpoint:
+- `GET /version`
+See xref:tigergraph-server:API:built-in-endpoints.adoc#_show_component_versions[Show component versions]
+
+
+== getVer()
+`getVer(component: str = "product", full: bool = False) -> str`
+
+Gets the version information of a specific component.
+
+Get the full list of components using `getVersion()`.
+
+[discrete]
+==== Parameters:
+* `component`: One of TigerGraph's components (e.g. product, gpe, gse).
+* `full`: Return the full version string (with timestamp, etc.) or just X.Y.Z.
+
+[discrete]
+==== Returns:
+Version info for specified component.
+
+[discrete]
+==== Raises:
+`TigerGraphException` if invalid/non-existent component is specified.
+
+
+== getLicenseInfo()
+`getLicenseInfo() -> dict`
+
+Returns the expiration date and remaining days of the license.
+
+[discrete]
+==== Returns:
+Returns license details. For an evaluation/trial deployment, returns an information message and -1 remaining days.
+
+
+== ping()
+`ping() -> dict`
+
+Public health check endpoint.
+
+[discrete]
+==== Returns:
+Returns a JSON object with a key of "message" and a value of "pong"
+
+
+== getSystemMetrics()
+`getSystemMetrics(from_ts: int = None, to_ts: int = None, latest: int = None, what: str = None, who: str = None, where: str = None)`
+
+Monitor system usage metrics.
+
+[discrete]
+==== Parameters:
+* `from_ts (int, optional)`: The epoch timestamp that indicates the start of the time filter.
+* `to_ts (int, optional)`: The epoch timestamp that indicates the end of the time filter.
+* `latest (int, optional)`: Number of datapoints to return. If provided, `from_ts` and `to_ts` will be ignored.
+* `what (str, optional)`: Name of the metric to filter for. Possible choices are: +
+- "cpu": Percentage of CPU usage by component
+- "mem": Memory usage in megabytes by component
+- "diskspace": Disk usage in megabytes by directory
+- "network": Network traffic in bytes since the service started
+- "qps": Number of requests per second by endpoint
+- "servicestate": The state of the service, either online 1 or offline 0
+- "connection": Number of open TCP connections
+* `who (str, optional)`: Name of the component that reported the datapoint.
+* `where (str, optional)`: Name of the node that reported the datapoint.
+
+[discrete]
+==== Returns:
+JSON object of datapoints collected.
+
+
+== getQueryPerformance()
+`getQueryPerformance(seconds: int = None)`
+
+Returns real-time query performance statistics over the given time period, as specified by the seconds parameter. 
+
+[discrete]
+==== Parameter:
+* `seconds (int, optional)`: Seconds are measured up to 60, so the seconds parameter must be a positive integer less than or equal to 60.
+
+
+== getServiceStatus()
+`getServiceStatus(request_body: dict)`
+
+Returns the status of the TigerGraph services specified in the request.
+Supported on databases versions 3.4 and above.
+
+[discrete]
+==== Parameter:
+* `request_body (dict)`: Must be formatted as specified here: https://docs.tigergraph.com/tigergraph-server/current/api/built-in-endpoints#_show_service_status
+
+
+== rebuildGraph()
+`rebuildGraph(threadnum: int = None, vertextype: str = "", segid: str = "", path: str = "", force: bool = False)`
+
+Rebuilds the graph engine immediately.  +
+See https://docs.tigergraph.com/tigergraph-server/current/api/built-in-endpoints#_rebuild_graph_engine[this] for more details. for more information.
+
+[discrete]
+==== Parameters:
+threadnum (int, optional): 
+Number of threads to execute the rebuild.
+* `vertextype (str, optional)`: Vertex type to perform the rebuild for. Will perform for all vertex types if not specified.
+* `segid (str, optional)`: Segment ID of the segments to rebuild. If not provided, all segments will be rebuilt. 
+In general, it is recommneded not to provide this parameter and rebuild all segments.
+* `path (str, optional)`: Path to save the summary of the rebuild to. If not provided, the default path is "/tmp/rebuildnow".
+* `force (bool, optional)`: Boolean value that indicates whether to perform rebuilds for segments for which there are no records of new data.
+Normally, a rebuild would skip such segments, but if force is set true, the segments will not be skipped.
+[discrete]
+==== Returns:
+JSON response with message containing the path to the summary file.
+
+

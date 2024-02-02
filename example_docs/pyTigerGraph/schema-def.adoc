@@ -1,0 +1,275 @@
+= Object-Oriented Schema
+
+The Object-Oriented Schema functionality allows users to manipulate schema elements in the database in an object-oriented approach in Python.
+
+To add an AccountHolder vertex and a HOLDS_ACCOUNT edge to the Ethereum dataset, simply:
+
+```py
+from pyTigerGraph import TigerGraphConnection
+from pyTigerGraph.schema import Graph, Vertex, Edge
+
+from datetime import datetime
+from typing import List, Dict, Optional, Union
+from dataclasses import dataclass, fields
+
+conn = TigerGraphConnection(host="http://YOUR_HOSTNAME_HERE", graphname="Ethereum")
+
+g = Graph(conn)
+
+
+@dataclass
+class AccountHolder(Vertex):
+    name: str
+    address: str
+    accounts: List[str]
+    dob: datetime
+    some_map: Dict[str, int]
+    some_double: "DOUBLE"
+    primary_id: str = "name"  # always of type string, corresponds to the desired primary ID attribute.
+    primary_id_as_attribute: bool = True
+
+@dataclass
+class HOLDS_ACCOUNT(Edge):
+    opened_on: datetime
+    from_vertex: Union[AccountHolder, g.vertex_types["Account"]]
+    to_vertex: g.vertex_types["Account"]
+    is_directed: bool = True
+    reverse_edge: str = "ACCOUNT_HELD_BY"
+    discriminator: str = "opened_on"
+
+g.add_vertex_type(AccountHolder)
+
+g.add_edge_type(HOLDS_ACCOUNT)
+
+g.commit_changes()
+```
+
+Users can define an entire graph schema in the approach below. Using the Cora dataset example, the schema would look something like this:
+
+```py
+from pyTigerGraph import TigerGraphConnection
+from pyTigerGraph.schema import Graph, Vertex, Edge
+
+conn = TigerGraphConnection("http://YOUR_HOSTNAME_HERE")
+
+g = Graph()
+
+@dataclass
+class Paper(Vertex):
+    id: int
+    y: int
+    x: List[int]
+    primary_id: str = "id"
+    primary_id_as_attribute: bool = True
+
+@dataclass
+class CITES(Edge):
+    from_vertex: Paper
+    to_vertex: Paper
+    is_directed: bool = True
+    reverse_edge: str = "R_CITES"
+
+g.add_vertex_type(Paper)
+g.add_edge_type(CITES)
+
+g.commit_changes(conn)
+```
+
+== Vertex
+
+Abstract parent class for other types of vertices to be inherited from.
+Contains class methods to edit the attributes associated with the vertex type.
+
+When defining new vertex types, make sure to include the `primary_id` and `primary_id_as_attribute` class attributes, as these are necessary to define the vertex in TigerGraph.
+
+For example, to define an AccountHolder vertex type, use:
+
+
+[source,indent=0]
+----
+@dataclass
+class AccountHolder(Vertex):
+    name: str
+    address: str
+    accounts: List[str]
+    dob: datetime
+    some_map: Dict[str, int]
+    some_double: "DOUBLE"
+    primary_id: str = "name"
+    primary_id_as_attribute: bool = True
+----
+
+
+
+=== add_attribute()
+`add_attribute(attribute_name: str, attribute_type, default_value = None)`
+
+Function to add an attribute to the given vertex type.
+
+[discrete]
+==== Parameters:
+* `attribute_name (str)`: The name of the attribute to add
+* `attribute_type (Python type)`: The Python type of the attribute to add. 
+For types that are not supported in Python but are in GSQL, wrap them in quotes; e.g. "DOUBLE"
+* `default_value (type of attribute, default None)`: The desired default value of the attribute. Defaults to None.
+
+
+=== remove_attribute()
+`remove_attribute(attribute_name)`
+
+Function to remove an attribute from the given vertex type.
+
+[discrete]
+==== Parameter:
+* `attribute_name (str)`: The name of the attribute to remove from the vertex.
+
+
+=== attributes()
+`attributes()`
+
+Class attribute to view the attributes and types of the vertex.
+
+
+== Edge
+
+Abstract parent class for other types of edges to be inherited from.
+Contains class methods to edit the attributes associated with the edge type.
+
+When defining new vertex types, make sure to include the required `from_vertex`, `to_vertex`, `reverse_edge`, `is_directed` attributes and optionally the `discriminator` attribute, as these are necessary to define the vertex in TigerGraph.
+
+For example, to define an HOLDS_ACCOUNT edge type, use:
+
+
+[source,indent=0]
+----
+@dataclass
+class HOLDS_ACCOUNT(Edge):
+    opened_on: datetime
+    from_vertex: Union[AccountHolder, g.vertex_types["Account"]]
+    to_vertex: g.vertex_types["Account"]
+    is_directed: bool = True
+    reverse_edge: str = "ACCOUNT_HELD_BY"
+    discriminator: str = "opened_on"
+----
+
+
+
+=== add_attribute()
+`add_attribute(attribute_name, attribute_type, default_value = None)`
+
+Function to add an attribute to the given edge type.
+
+[discrete]
+==== Parameters:
+* `attribute_name (str)`: The name of the attribute to add.
+* `attribute_type (Python type)`: The Python type of the attribute to add. 
+For types that are not supported in Python but are in GSQL, wrap them in quotes; e.g. "DOUBLE"
+* `default_value (type of attribute, default None)`: The desired default value of the attribute. Defaults to None.
+
+
+=== remove_attribute()
+`remove_attribute(attribute_name)`
+
+Function to remove an attribute from the given edge type.
+
+[discrete]
+==== Parameter:
+* `attribute_name (str)`: The name of the attribute to remove from the edge.
+
+
+=== attributes()
+`attributes()`
+
+Class attribute to view the attributes and types of the vertex.
+
+
+== Graph
+
+The graph object can be used in conjunction with a TigerGraphConnection to retrieve the schema of the connected graph.
+Serves as the way to collect the definitions of Vertex and Edge types.
+
+To instantiate the graph object with a connection to an existing graph, use:
+
+[source,indent=0]
+----
+from pyTigerGraph.schema import Graph
+
+g = Graph(conn)
+----
+
+
+
+=== \__init__()
+`__init__(conn: TigerGraphConnection = None)`
+
+Graph class for schema representation.
+
+[discrete]
+==== Parameter:
+* `conn (TigerGraphConnection, optional)`: Connection to a TigerGraph database. Defaults to None.
+
+
+=== add_vertex_type()
+`add_vertex_type(vertex: Vertex, outdegree_stats = True)`
+
+Add a vertex type to the list of changes to commit to the graph.
+
+[discrete]
+==== Parameters:
+* `vertex (Vertex)`: The vertex type definition to add to the addition cache.
+* `outdegree_stats (bool, optional)`: Whether or not to include "WITH OUTEGREE_STATS=TRUE" in the schema definition.
+Used for caching outdegree, defaults to True.
+
+
+=== add_edge_type()
+`add_edge_type(edge: Edge)`
+
+Add an edge type to the list of changes to commit to the graph.
+
+[discrete]
+==== Parameter:
+* `edge (Edge)`: The edge type definition to add to the addition cache.
+
+
+=== remove_vertex_type()
+`remove_vertex_type(vertex: Vertex)`
+
+Add a vertex type to the list of changes to remove from the graph.
+
+[discrete]
+==== Parameter:
+* `vertex (Vertex)`: The vertex type definition to add to the removal cache.
+
+
+=== remove_edge_type()
+`remove_edge_type(edge: Edge)`
+
+Add an edge type to the list of changes to remove from the graph.
+
+[discrete]
+==== Parameter:
+* `edge (Edge)`: The edge type definition to add to the removal cache.
+
+
+=== commit_changes()
+`commit_changes(conn: TigerGraphConnection = None)`
+
+Commit schema changes to the graph.
+[discrete]
+==== Parameter:
+* `conn (TigerGraphConnection, optional)`: Connection to the database to edit the schema of.
+Not required if the Graph was instantiated with a connection object.        
+
+
+=== vertex_types()
+`vertex_types()`
+
+Vertex types property.
+
+
+=== edge_types()
+`edge_types()`
+
+Edge types property.
+
+

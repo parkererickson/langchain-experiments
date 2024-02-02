@@ -1,0 +1,56 @@
+= `TigerGraphConnection`
+
+
+A TigerGraphConnection object provides the HTTP(S) communication used by all other modules.
+
+
+
+== \__init__()
+`__init__(host: str = "http://127.0.0.1", graphname: str = "MyGraph", gsqlSecret: str = "", username: str = "tigergraph", password: str = "tigergraph", tgCloud: bool = False, restppPort: Union[int, str] = "9000", gsPort: Union[int, str] = "14240", gsqlVersion: str = "", version: str = "", apiToken: str = "", useCert: bool = None, certPath: str = None, debug: bool = None, sslPort: Union[int, str] = "443", gcp: bool = False)`
+
+Initiate a connection object.
+
+[discrete]
+==== Parameters:
+* `host`: The host name or IP address of the TigerGraph server. Make sure to include the
+protocol (http:// or https://). If `certPath` is `None` and the protocol is https,
+a self-signed certificate will be used.
+* `graphname`: The default graph for running queries.
+* `gsqlSecret`: The secret key for GSQL.  +
+See https://docs.tigergraph.com/tigergraph-server/current/user-access/managing-credentials#_secrets.[this] for more details.
+* `username`: The username on the TigerGraph server.
+* `password`: The password for that user.
+* `tgCloud`: Set to `True` if using TigerGraph Cloud. If your hostname contains `tgcloud`, then
+this is automatically set to `True`, and you do not need to set this argument.
+* `restppPort`: The port for REST++ queries.
+* `gsPort`: The port for gsql server.
+* `gsqlVersion`: The version of the GSQL client to be used. Effectively the version of the database
+being connected to.
+* `version`: DEPRECATED; use `gsqlVersion`.
+* `apiToken`: DEPRECATED; use `getToken()` with a secret to get a session token.
+* `useCert`: DEPRECATED; the need for a CA certificate is now determined by URL scheme.
+* `certPath`: The filesystem path to the CA certificate. Required in case of https connections.
+* `debug`: DEPRECATED; configure standard logging in your app.
+* `sslPort`: Port for fetching SSL certificate in case of firewall.
+* `gcp`: DEPRECATED. Previously used for connecting to databases provisioned on GCP in TigerGraph Cloud.
+
+[discrete]
+==== Raises:
+TigerGraphException: In case on invalid URL scheme.
+
+
+== customizeHeader()
+`customizeHeader(timeout: int = 16000, responseSize: int = 32000000.0)`
+
+Method to configure the request header.
+
+[discrete]
+==== Parameters:
+* `tiemout (int, optional)`: The timeout value desired in milliseconds. Defaults to 16,000 ms (16 sec)
+* `responseSize`: The size of the response in bytes. Defaults to 3.2E7 bytes (32 MB).
+
+[discrete]
+==== Returns:
+Nothing. Sets `responseConfigHeader` class attribute.
+
+

@@ -1,0 +1,123 @@
+= Connecting to TigerGraph
+:description: Instructions on connecting to TigerGraph instances using pyTigerGraph.
+:sectnums:
+
+Having installed pyTigerGraph, the next step is to connect to a running TigerGraph instance to access and make changes to your graph data.
+
+TigerGraph Cloud instances and non-Cloud instances require different credentials.
+This page covers both connections to Cloud and non-Cloud instances.
+
+== Prerequisites
+* pyTigerGraph is installed on your machine.
+* You have access to a running TigerGraph instance.
+* You have created a graph on your TigerGraph instance.
+* If your TigerGraph instance has authentication enabled, you have created a graph, and generated a xref:tigergraph-server:user-access:managing-credentials.adoc#_secrets[secret].
+See xref:tigergraph-server:user-access:managing-credentials.adoc#_create_a_secret[Managing Credentials] for how to create a secret.
+
+== Connect to a graph on a non-Cloud TigerGraph instance
+
+To access a graph on a non-Cloud TigerGraph instance, you need to provide the following information:
+
+* Hostname or IP address of the instance
+* Name of the graph you are connecting to
+* Your xref:tigergraph-server:user-access:index.adoc#_users_and_credentials[database username and password]
+* Secret associated with your database user and graph
+
+=== Initiate connection
+
+Use the `TigerGraphConnection` function to initiate a connection to your TigerGraph instance:
+
+[source.wrap,python]
+----
+conn = tg.TigerGraphConnection(host="<hostname>", graphname="<graph_name>", username="<username>", password="<password>") <1>
+conn.getToken(<secret>) <2>
+----
+<1> The username and password are provided via the constructor of xref:core-functions:base.adoc[the `TigerGraphConnection` class].
+<2> Secrets are unique strings that serve as a user’s credentials when generating authentication tokens for REST API endpoints.
+
+The graph in this context is a logical container that consists of object type definitions (vertex and edge types, user-defined types (UDTs), data sources, etc.)  and the instances of these object types.
+A TigerGraph instance can contain multiple graphs, so you need to specify which one you want to use.
+
+=== Generate authentication token
+If the instance has user authentication enabled, you also need to provide a xref:tigergraph-server:user-access:managing-credentials.adoc#_secrets[secret], which is a unique string that serve as a user’s credential when creating authentication tokens for TigerGraph's REST API endpoints.
+
+Run the following function to generate an authentication.
+After running the function, the token is saved to the `TigerGraphConnection` object, and you can now use its methods to access and modify graph data.
+
+[,python]
+----
+conn.getToken(<secret>)
+----
+
+=== Example
+
+In this command, the user is connecting to the `127.0.0.1` host and accessing the `GoodsDelivery` graph, providing the username `hsolo` and corresponding password `f4lc0n` as well as the secret for the bearer token authentication scheme.
+
+[source.wrap,python]
+----
+from pyTigerGraph import TigerGraphConnection
+
+conn = TigerGraphConnection(host="127.0.0.1", graphname="GoodsDelivery", username="hsolo", password="f4lc0n")
+conn.getToken('oodvd1upqbj96vq22jof21o8nl8cjkd5') <1>
+----
+<1> The string in the `getToken()` argument is a secret.
+See xref:tigergraph-server:user-access:managing-credentials.adoc#_create_a_secret[] for how to create a secret.
+
+
+
+== Connect to a graph on a TigerGraph Cloud instance
+
+NOTE: This process applies to TigerGraph Cloud solutions created after July 5th, 2022.
+If your solution was created before that date, follow <<_connect_to_a_graph_on_a_non_cloud_tigergraph_instance,the procedure for non-Cloud instances>> instead to connect to your solution.
+
+To connect to a TigerGraph Cloud instance, you no longer need to provide a username-password pair.
+You only need to provide the following information:
+
+* Hostname or IP address of the instance
+* Name of the graph you are connecting to
+* Secret associated with your database user and graph.
+To create a secret on TigerGraph Cloud, you need to use Admin Portal interface and click the plus sign on thexref:gui:admin-portal:management/user-management.adoc#_my_profile[ My Profile page to create a secret for your user].
+
+=== Establish initial connection
+Use the `TigerGraphConnection` constructor function to declare a `TigerGraphConnection` object:
+
+[,python]
+----
+from pyTigerGraph import TigerGraphConnection
+
+conn = TigerGraphConnection(
+    host=<hostname>,
+    graphname=<graph_name>,
+    gsqlSecret=<secret>,
+)
+----
+
+=== Generate authentication token
+Cloud instances all have authentication enabled.
+Before you can access graph data, you need to run `getToken()` function to generate a authentication token.
+You need to provide your secret again in this function call:
+
+[,python]
+----
+conn.getToken(<secret>)
+----
+
+=== Example
+
+In this command, the user is connecting to the `r_alliance.i.tgcloud.io` cloud instance and accessing the `GoodsDelivery` graph, providing the secret for the bearer token authentication scheme.
+
+[source.wrap,python]
+----
+from pyTigerGraph import TigerGraphConnection
+
+conn = TigerGraphConnection(host="r_alliance.i.tgcloud.io", graphname="GoodsDelivery", gsqlSecret="oodvd1upqbj96vq22jof21o8nl8cjkd5") <1>
+conn.getToken('oodvd1upqbj96vq22jof21o8nl8cjkd5') <1>
+----
+<1> The string in the `getToken()` argument is a secret.
+See xref:tigergraph-server:user-access:managing-credentials.adoc#_create_a_secret[Managing Credentials] for how to create a secret.
+
+
+
+
+
+

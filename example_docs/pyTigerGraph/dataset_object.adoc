@@ -1,0 +1,32 @@
+= Datasets
+
+
+Stock datasets that can be ingested into a TigerGraph database through the `ingestDataset`
+function in pyTigerGraph.
+
+== \__init__()
+`__init__(name: str = None, tmp_dir: str = "./tmp") -> None`
+
+Stock datasets.
+
+Please see https://tigergraph-public-data.s3.us-west-1.amazonaws.com/inventory.json[this link]
+for datasets that are currently available. The files for the dataset with `name` will be
+downloaded to local `tmp_dir` automatically when this class is instantiated. 
+For offline environments, download the desired .tar manually from the inventory page, and extract in the desired location.
+Specify the `tmp_dir` parameter to point to where the unzipped directory resides.
+
+
+[discrete]
+==== Parameters:
+* `name (str, optional)`: Name of the dataset to get. If not provided or None, available datasets will be printed out.
+Defaults to None.
+* `tmp_dir (str, optional)`: Where to store the artifacts of this dataset. Defaults to "./tmp".
+
+
+== list()
+`list() -> None`
+
+List available stock datasets
+
+
+

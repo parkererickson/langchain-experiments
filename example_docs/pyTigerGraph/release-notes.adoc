@@ -1,0 +1,163 @@
+= Release Notes
+
+== [1.5] - 2023-09-25
+
+Release of pyTigerGraph version 1.5. 
+
+=== Added:
+* xref:pytigergraph:object_oriented_schema:schema-def.adoc[Object-oriented schema definition and modifcation]. Define graph schemas in native Python, without knowing GSQL.
+* `gsql()` handles some common error cases and raises an exception if they occur.
+
+=== Changed:
+* Dataloaders that experience a parsing error due to missing/dirty data handle the error more gracefully.
+* Removed the use of pyTigerDriver for GSQL operations.
+* Various bug fixes.
+
+== [1.4] - 2023-05-16
+
+Release of pyTigerGraph version 1.4. 
+
+**Note:** if you are using the Graph Data Science dataloaders, you must upgrade both the ML Workbench and pyTigerGraph to 1.4 at the same time. 
+There is a incompatibility between v1.3 and v1.4 of pyTigerGraph and the corresponding ML Workbench versions. 
+
+=== Added:
+* Additional Query Management Support
+    - xref:pytigergraph:core-functions:query.adoc#_showquery[`showQuery()`] returns the GSQL of a given query.
+    - xref:pytigergraph:core-functions:query.adoc#_getquerymetadata[`getQueryMetadata()`] returns the metadata details about a query, such as input parameters and what is returned in `PRINT` statements.
+    - xref:pytigergraph:core-functions:query.adoc#_getrunningqueries[`getRunningQueries()`] shows the statistics of queries currently running on the graph.
+    - xref:pytigergraph:core-functions:query.adoc#_abortquery[`abortQuery()`] aborts a selected query by ID or all queries on the graph.
+* Additional System Management Support
+    - xref:pytigergraph:core-functions:utils.adoc#_ping[`ping()`] is a public API to check the health of the TigerGraph server.
+    - xref:pytigergraph:core-functions:utils.adoc#_getsystemmetrics[`getSystemMetrics()`] monitors system metrics such as CPU and RAM usage.
+    - xref:pytigergraph:core-functions:utils.adoc#_getqueryperformance[`getQueryPerformance()`] returns real-time query performance statistics over a given period.
+    - xref:pytigergraph:core-functions:utils.adoc#_getservicestatus[`getServiceStatus()`] returns the status of TigerGraph services specified in the request.
+    - xref:pytigergraph:core-functions:utils.adoc#_rebuildgraph[`rebuildGraph()`] xref:3.9@tigergraph-server:API:built-in-endpoints.adoc#_rebuild_graph_engine[rebuilds] the graph immediately.
+* Built in Graph ML models and Trainer
+    - xref:pytigergraph:gds:graphsage.adoc[Various GraphSAGE models] for vertex classification and regression, as well as link prediction.
+    - xref:pytigergraph:gds:nodepiece.adoc[NodePiece MLP model] for vertex classification.
+    - xref:pytigergraph:gds:trainer.adoc[General purpose trainer] to enable training of Graph ML models in a concise fashion.
+* Transforms
+    - xref:pytigergraph:gds:pyg_transforms.adoc[`PyGTemporalTransform`] to create a sequence of subgraphs for a given batch of data, in a temporal manner. 
+    - xref:pytigergraph:gds:nodepiece_transforms.adoc[`NodePieceMLPTransform`] to transform a batch produced by a NodePiece dataloader into a batch that can be fed into a PyTorch multilayer perceptron.
+* Additional Dataloader Support
+    - SSL Support: two-way SSL encryption via Kerberos.
+    - Collaborative dataloaders: use dataloaders on multiple machines to pull batches from the same Kafka queue. Helpful for data distributed model training.
+    - Datetime support in dataloaders: Output `DATETIME` attributes from the database using the dataloaders. Exports as UNIX epoch timestamps.
+    - Optional `distributed_query` parameter in dataloaders if running on distributed database clusters. If set to True, installs the dataloader using the `DISTRIBUTED` keyword in the query heading. Useful for distributed database clusters.
+    - `stop()` function in dataloaders: Kill the query producing batches for the dataloader immediately. Helpful for stopping the production of batches sent to Kafka after breaking out of a training loop.
+
+=== Changed:
+* Dataloader factory produces multiple dataloaders if `filter_by` is a list of different filters.
+* Improved the scalability of the NodePiece dataloader.
+
+== [1.3] - 2023-02-01
+
+Release of pyTigerGraph version 1.3. 
+
+=== Added:
+* Two new dataloaders: HGTLoader and NodePiece
+    - The HGTLoader is a data loader that performs stratified neighbor sampling link:https://arxiv.org/abs/2003.01332[Heterogeneous Graph Transformer].
+    - NodePiece is a scalable graph embedding approach introduced in link:https://arxiv.org/abs/2106.12144[NodePiece: Compositional and Parameter-Efficient Representations of Large Knowledge Graphs]
+* Callback functions to all dataloaders: write functions to process the batch in a background thread before it is passed into the training loop.
+
+=== Changed:
+* Added better error messaging when REST requests are incorrect.
+* Template query support in the featurizer (requires TigerGraph Database 3.9+)
+* Data splitters automatically perform a schema change if needed to add attributes to the database.
+
+=== Fixed:
+* Fixed how custom SSL certificates were handled when instantiating the GSQL client.
+
+
+== [1.2] - 2022-11-09
+
+Release of pyTigerGraph version 1.2. 
+
+=== Added:
+* The `Datasets` class, a way to easily import standard datasets into a database instance.
+* The `visualizeSchema` function to visualize graph schemas.
+* Proper deprecation warnings.
+* Logging capabilities using native Python logging tools.
+* Ability to run asynchronous queries from `runInstalledQuery()`
+
+=== Changed:
+* Many changes to the `featurizer` capability, including:
+    - Automatically selecting the correct version of a graph data science algorithm given your version of the database.
+    - Automatically creating the schema change necessary to run the algorithm and store the results to an attribute.
+    - If the algorithm is not already installed at runtime, and is included in the TigerGraph Graph Data Science Library, the algorithm will be installed automatically.
+    - Adding more supported algorithms, in categories such as similarity and topological link prediction.
+
+== [1.1] - 2022-09-06
+
+Release of pyTigerGraph version 1.1. 
+
+=== Added:
+* TensorFlow support for homogeneous GNNs via the Spektral library.
+* Heterogeneous Graph Dataloading support for DGL.
+* Support of lists of strings in dataloaders.
+
+=== Changed:
+* Fixed KeyError when creating a data loader on a graph where PrimaryIdAsAttribute is False.
+* Error catch if Kafka dataloader doesn't run in async mode.
+* Refresh schema during dataloader instantiation and featurizer attribute addition.
+* Reduce connection instantiation time.
+* Reinstall query if it is disabled.
+* Confirm Kafka topic is created before subscription.
+* More efficient use of Kafka resources.
+* Allow multiple consumers on the same data.
+* Improved deprecation warnings.
+
+
+== [1.0] - 2022-07-11
+
+Release of pyTigerGraph version 1.0, in conjunction with version 1.0 of the link:https://docs.tigergraph.com/ml-workbench/current/overview/[TigerGraph Machine Learning Workbench]. 
+
+=== Added:
+* Kafka authentication support for ML Workbench enterprise users.
+* Custom query support for Featurizer, allowing developers to generate their own graph-based features as well as use our link:https://docs.tigergraph.com/graph-ml/current/intro/[built-in Graph Data Science algorithms].
+
+=== Changed:
+* Additional testing of GDS functionality
+* More demos and tutorials for TigerGraph ML Workbench, found link:https://github.com/TigerGraph-DevLabs/mlworkbench-docs[here].
+* Various bug fixes.
+
+
+== [0.9.1] - 2022-06-21
+Added new parameter, `tgCloud` for when connecting to a TigerGraph Cloud instance. Set to `True` if using a new TigerGraph Cloud 
+
+=== Changed:
+* Deprecated `gcp` parameter, as `tgCloud` supercedes this. Existing code will be compatible.
+
+== [0.9] - 2022-05-16
+
+We are excited to announce the pyTigerGraph v0.9 release!
+This release adds many new features for graph machine learning and graph data science, a refactoring of core code, and more robust testing.
+Additionally, we have officially “graduated” it to an official TigerGraph product. This means brand-new documentation, a new GitHub repository, and future feature enhancements.
+
+We are committed to keeping pyTigerGraph true to its roots as an open-source project.
+Check out the xref:contributing:index.adoc[Contributing] page and our link:https://github.com/tigergraph/pyTigerGraph/issues[GitHub Issues page] if you want to help with pyTigerGraph’s development.
+
+pyTigerGraph 0.9 was released on May 16th, 2022.
+
+=== New Features
+==== Graph Data Science Capability
+Many new capabilities added for graph data science and graph machine learning.
+
+* Data loaders for training Graph Neural Networks in DGL and PyTorch Geometric
+
+* A "featurizer" to generate graph-based features 
+
+* Metric trackers for precision, recall, and accuracy
+
+* Vertex and edge splitters for generation of train/validation/testing splits.
+
+=== Other Changes
+==== Documentation
+We have moved the documentation to the https://docs.tigergraph.com/pytigergraph/current/intro/[official TigerGraph Documentation site ] and updated many of the contents with type hints and more descriptive parameter explanations.
+
+==== Testing
+There is now well-defined testing for every function in the package.
+A more defined testing framework is coming soon.
+
+==== Code Structure
+A major refactor of the codebase was performed. No breaking changes were made to accomplish this.

@@ -1,0 +1,139 @@
+= Data Splitting Functions
+
+This class contains functions for data splitting. 
+Make sure to create the appropriate attributes in the graph before using these functions.
+
+== RandomVertexSplitter
+
+The split results are stored in the provided vertex attributes. Each boolean attribute
+indicates which part a vertex belongs to.
+
+[discrete]
+==== Usage:
+
+* A random 60% of vertices will have their attribute "attr_name" set to True, and
+others False. `attr_name` can be any attribute that exists in the database (same below).
+Example:
+
++
+[source,python]
+----
+conn = TigerGraphConnection(...)
+splitter = RandomVertexSplitter(conn, timeout, attr_name=0.6)
+splitter.run()
+----
+
+* A random 60% of vertices will have their attribute "attr_name" set to True, and a
+random 20% of vertices will have their attribute "attr_name2" set to True. The two
+parts are disjoint. Example:
+
++
+[source,python]
+----
+conn = TigerGraphConnection(...)
+splitter = RandomVertexSplitter(conn, timeout, attr_name=0.6, attr_name2=0.2)
+splitter.run()
+----
+
+* A random 60% of vertices will have their attribute "attr_name" set to True, a
+random 20% of vertices will have their attribute "attr_name2" set to True, and
+another random 20% of vertices will have their attribute "attr_name3" set to True.
+The three parts are disjoint. Example:
++
+[source,python]
+----
+conn = TigerGraphConnection(...)
+splitter = RandomVertexSplitter(conn, timeout, attr_name=0.6, attr_name2=0.2, attr_name3=0.2)
+splitter.run()
+----
+
+[discrete]
+==== Parameters:
+* `conn (TigerGraphConnection)`: Connection to TigerGraph database.
+* `v_types (List[str], optional)`: List of vertex types to split. If not provided, all vertex types are used.
+* `timeout (int, optional)`: Timeout value for the operation. Defaults to 600000.
+
+
+=== run()
+`run() -> None`
+
+Perform the split.
+
+The split ratios set in initialization can be overridden here. 
+
+For example:
+
+[,python]
+----
+splitter = RandomVertexSplitter(conn, timeout, attr_name=0.6); 
+splitter.run(attr_name=0.3)
+----
+
+The spliter above uses the ratio 0.3 instead of 0.6.
+
+
+== RandomEdgeSplitter
+
+The split results are stored in the provided edge attributes. Each boolean attribute
+indicates which part an edge belongs to.
+
+[discrete]
+==== Usage:
+
+* A random 60% of edges will have their attribute "attr_name" set to True, and 
+others False. `attr_name` can be any attribute that exists in the database (same below).
+Example:
++
+[source,python]
+----
+conn = TigerGraphConnection(...)
+splitter = conn.gds.edgeSplitter(timeout, attr_name=0.6)
+splitter.run()
+----
+
+* A random 60% of edges will have their attribute "attr_name" set to True, and a 
+random 20% of edges will have their attribute "attr_name2" set to True. The two 
+parts are disjoint. Example:
++   
+[source,python]
+----
+conn = TigerGraphConnection(...)
+splitter = conn.gds.edgeSplitter(timeout, attr_name=0.6, attr_name2=0.2)
+splitter.run()
+----
+
+* A random 60% of edges will have their attribute "attr_name" set to True, a 
+random 20% of edges will have their attribute "attr_name2" set to True, and 
+another random 20% of edges will have their attribute "attr_name3" set to True. 
+The three parts are disjoint. Example:
++    
+[source,python]
+----
+conn = TigerGraphConnection(...)
+splitter = conn.gds.edgeSplitter(timeout, attr_name=0.6, attr_name2=0.2, attr_name3=0.2)
+splitter.run()
+----
+
+[discrete]
+==== Parameters:
+* `conn (TigerGraphConnection)`: Connection to TigerGraph database.
+* `e_types (List[str], optional)`: List of edge types to split. If not provided, all edge types are used.
+* `timeout (int, optional)`: Timeout value for the operation. Defaults to 600000.
+
+
+=== run()
+`run() -> None`
+
+Perform the split.
+
+The split ratios set in initialization can be overridden here. 
+For example:
+
+[source,python]
+----
+splitter = RandomVertexSplitter(conn, timeout, attr_name=0.6); 
+splitter.run(attr_name=0.3)
+----
+The splitter above uses the ratio 0.3 instead of 0.6.
+
+

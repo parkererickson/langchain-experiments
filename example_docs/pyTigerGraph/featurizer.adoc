@@ -1,0 +1,152 @@
+= Featurizer
+
+The Featurizer class provides methods for installing and running Graph Data Science Algorithms onto a TigerGraph server.
+
+== AsyncFeaturizerResult
+Object to keep track of featurizer algorithms being ran in asynchronous mode. (`runAsync=True`).
+
+
+=== wait()
+`wait(refresh: float = 1)`
+
+Function call to block all execution if called until algorithm result is returned.
+[discrete]
+==== Parameter:
+* `refresh (float)`: How often to check for results. Defaults to 1 time every second.
+
+[discrete]
+==== Returns:
+Algorithm results when they become available.
+
+
+=== algorithmComplete()
+`algorithmComplete()`
+
+Function to check if the algorithm has completed execution.
+[discrete]
+==== Returns:
+True if algorithm has completed, False if the algorithm is still running.
+[discrete]
+==== Raises:
+TigerGraphException if the algorithm was aborted or timed out.
+
+
+=== result()
+`result()`
+
+Property to get the results of an algorithm's execution.
+If the results are available, returns them.
+If the results are not available yet, returns the string 'Algorithm Results not Available Yet'
+
+
+== Featurizer
+The Featurizer pulls the most up-to-date version of the algorithm available in our public GitHub repository that is
+compatible with your database version.
+Note: In environments not connected to the public internet, you can download the repository manually and use the featurizer
+like this:
+
+[source,indent=0]
+----
+import pyTigerGraph as tg
+from pyTigerGraph.gds.featurizer import Featurizer
+
+conn = tg.TigerGraphConnection(host="HOSTNAME_HERE", username="USERNAME_HERE", password="PASSWORD_HERE", graphname="GRAPHNAME_HERE")
+conn.getToken(conn.createSecret())
+feat = Featurizer(conn, repo="PATH/TO/MANUALLY_DOWNLOADED_REPOSITORY")
+
+res = feat.runAlgorithm("tg_pagerank", params={"v_type": "Paper", "e_type": "CITES"})
+
+print(res)
+----
+
+
+
+=== listAlgorithms()
+`listAlgorithms(category: str = None) -> None`
+
+Print the list of available algorithms in GDS.
+
+[discrete]
+==== Parameter:
+* `category (str)`: the category of algorithms to print, if it is None then a summary will be printed.
+
+
+=== installAlgorithm()
+`installAlgorithm(query_name: str, query_path: str = None, global_change: bool = False, distributed_query: bool = False) -> str`
+
+Checks if the query is already installed.
+If the query is not installed, it installs the query and changes the schema if an attribute needs to be added.
+
+[discrete]
+==== Parameters:
+* `query_name (str)`: The name of query to be installed.
+* `query_path (str, optional)`: If using a custom query, the path to the `.gsql` file that contains the query.
+Note: you must have the `query_name` parameter match the name of the query in the file.
+* `global_change (bool, optional)`: False by default. Set to true if you want to run `GLOBAL SCHEMA_CHANGE JOB`. For algorithms that are not schema free we need to specify this argument.
+ +
+See https://docs.tigergraph.com/gsql-ref/current/ddl-and-loading/modifying-a-graph-schema#_global_vs_local_schema_changes.[this] for more details.
+* `distributed_query (bool, optional)`: False by default. 
+[discrete]
+==== Returns:
+String of query name installed.
+
+
+=== getParams()
+`getParams(query_name: str, printout: bool = True) -> dict`
+
+Get paramters for an algorithm.
+
+[discrete]
+==== Parameters:
+* `query_name (str)`: Name of the algorithm.
+* `printout (bool, optional)`: Whether to print out the parameters. Defaults to True.
+
+[discrete]
+==== Returns:
+Parameter dict the algorithm takes as input.
+
+
+=== runAlgorithm()
+`runAlgorithm(query_name: str, params: dict = None, runAsync: bool = False, threadLimit: int = None, memoryLimit: int = None, feat_name: str = None, feat_type: str = None, custom_query: bool = False, schema_name: list = None, global_schema: bool = False, timeout: int = 2147480, sizeLimit: int = None, templateQuery: bool = False, distributed_query: bool = False) -> Any`
+
+Runs a TigerGraph Graph Data Science Algorithm. If a built-in algorithm is not installed, it will automatically install before execution.
+Custom algorithms will have to be installed using the `installAlgorithm()` method.
+If the query accepts input parameters and the parameters have not been provided, calling this function runs the query with the default values for the parameters.
+If the there isn't a default value in the query definition and no parameters are provided, the function raises a `ValueError`.
+
+[discrete]
+==== Parameters:
+* `query_name (str)`: The name of the query to be executed.
+* `params (dict)`: Query parameters. A dictionary that corresponds to the algorithm parameters.
+If specifying vertices as sources or destinations, must use the following form: +
+ +
+`{"id": "vertex_id", "type": "vertex_type"}`, such as `params = {"source": {"id": "Bob", "type": "Person"}}`
++
+* `runAsync (bool, optional)`: If True, runs the algorithm in asynchronous mode and returns a `AsyncFeaturizerResult` object. Defaults to False.
+* `threadLimit`: Specify a limit of the number of threads the query is allowed to use on each node of the TigerGraph cluster.
+See xref:tigergraph-server:API:built-in-endpoints#_specify_thread_limit[Thread limit]
+* `memoryLimit`: Specify a limit to the amount of memory consumed by the query (in MB). If the limit is exceeded, the query will abort automatically.
+Supported in database versions >= 3.8.
+See xref:tigergraph-server:system-management:memory-management#_by_http_header[Memory limit]
+* `feat_name (str, optional)`: An attribute name that needs to be added to the vertex/edge. If the result attribute parameter is specified in the parameters, that will be used.
+* `feat_type (str, optional)`: Type of attribute that needs to be added to the vertex/edge. Only needed if `custom_query` is set to `True`.
+* `custom_query (bool, optional)`: If the query is a custom query. Defaults to False.
+* `schema_name (list, optional)`: List of Vertices/Edges that the attr_name need to added to them.
+If the algorithm contains the parameters of `v_type` and `e_type` or `v_type_set` and `e_type_set`, these will be used automatically.
+* `global_schema (bool, optional)`: False by default. Set to true if you want to run `GLOBAL SCHEMA_CHANGE JOB`.
+ +
+See https://docs.tigergraph.com/gsql-ref/current/ddl-and-loading/modifying-a-graph-schema#_global_vs_local_schema_changes.[this] for more details.
+* `timeout (int, optional)`: Maximum duration for successful query execution (in milliseconds).
+* `sizeLimit (int, optional)`: Maximum size of response (in bytes).
+* `templateQuery (bool, optional)`: Whether to call packaged template query.  +
+See https://docs.tigergraph.com/graph-ml/current/using-an-algorithm/#_packaged_template_queries[this] for more details. for more details.
+Note that currently not every algorithm supports template query. More will be added in the future.
+Default: False.
+* `distributed_query (bool, optional)`: Whether to run the query in distributed mode. Defaults to False.
+
+[discrete]
+==== Returns:
+The output of the query, a list of output elements (vertex sets, edge sets, variables,
+accumulators, etc.)
+
+

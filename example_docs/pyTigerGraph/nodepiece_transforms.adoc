@@ -1,0 +1,27 @@
+= NodePiece Transforms
+
+== NodePieceMLPTransform
+The NodePieceMLPTransform converts a batch of data from the NodePieceLoader into a format that can be used in a MLP implemented in PyTorch.
+
+
+=== \__init__()
+`__init__(label: str, features: list, target_type: str = None)`
+
+Instantiate a NodePieceMLPTransform.
+[discrete]
+==== Parameters:
+label (str): 
+The attribute name that corresponds with the label being predicted. Supports numerical datatypes (INT, FLOAT, DOUBLE).
+* `features (list of str, optional)`: List of attributes to use as features into the model. Supports numerical datatypes (INT, FLOAT, DOUBLE).
+* `target_type (str, optional)`: The type of vertex to perform predictions on.
+
+
+=== __call__()
+`__call__(data)`
+
+Perform the transform.
+[discrete]
+==== Parameter:
+* `data (pd.DataFrame)`: Batch of data produced by the NodePiece Loader.
+
+

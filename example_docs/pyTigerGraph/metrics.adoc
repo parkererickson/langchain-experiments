@@ -1,0 +1,495 @@
+= pyTigerGraph GDS Metrics
+
+:stem: latexmath
+
+Utility for gathering metrics for GNN predictions.
+
+== Accuracy
+
+Accuracy = stem:[\sum_{i=1}^n (predictions_i == labels_i)/n]
+
+[discrete]
+==== Usage:
+
+* Call the update function to add predictions and labels.
+* Get accuracy score at any point by accessing the value property.
+
+
+=== update()
+`update(preds: ndarray, labels: ndarray) -> None`
+
+Add predictions and labels to be compared.
+
+[discrete]
+==== Parameters:
+preds (ndarray): 
+Array of predicted labels.
+labels (ndarray): 
+Array of true labels.
+
+
+=== value()
+`value() -> float`
+
+Get accuracy score.
+[discrete]
+==== Returns:
+Accuracy score (float).
+
+
+== BinaryRecall
+This metric is deprecated. Use Recall instead.
+
+Recall = stem:[\sum(predictions * labels)/\sum(labels)]
+
+This metric is for binary classifications, i.e., both predictions and labels are arrays of 0's and 1's.
+
+[discrete]
+==== Usage:
+
+* Call the update function to add predictions and labels.
+* Get recall score at any point by accessing the value property.
+
+
+=== update()
+`update(preds: ndarray, labels: ndarray) -> None`
+
+Add predictions and labels to be compared.
+
+[discrete]
+==== Parameters:
+preds (ndarray): 
+Array of predicted labels.
+labels (ndarray): 
+Array of true labels.
+
+
+=== value()
+`value() -> float`
+
+Get recall score.
+[discrete]
+==== Returns:
+Recall score (float).
+
+
+== ConfusionMatrix
+Updates a confusion matrix as new updates occur.
+
+[discrete]
+==== Parameters:
+* `num_classes (int)`: Number of classes in your classification task.
+
+
+=== \__init__()
+`__init__(num_classes: int) -> None`
+
+Instantiate the Confusion Matrix metric.
+[discrete]
+==== Parameter:
+* `num_classes (int)`: Number of classes in the classification task.
+
+
+=== update()
+`update(preds: ndarray, labels: ndarray) -> None`
+
+Add predictions and labels to be compared.
+
+[discrete]
+==== Parameters:
+preds (ndarray): 
+Array of predicted labels.
+labels (ndarray): 
+Array of true labels.
+
+
+=== value()
+`value() -> np.array`
+
+Get the confusion matrix.
+[discrete]
+==== Returns:
+Consfusion matrix in dataframe form.
+
+
+== Recall
+
+Recall = stem:[true positives/\sum(true positives + false negatives)}
+
+This metric is for classification, i.e., both predictions and labels are arrays of multiple whole numbers.
+
+[discrete]
+==== Usage:
+
+* Call the update function to add predictions and labels.
+* Get recall score at any point by accessing the value property.
+
+
+=== value()
+`value() -> Union[dict, float]`
+
+Get recall score for each class.
+[discrete]
+==== Returns:
+Recall score for each class or the average recall if `num_classes` == 2.
+
+
+== BinaryPrecision
+This metric is deprecated. Use the Precision metric instead. 
+Precision = stem:[\sum(predictions * labels)/\sum(predictions)]
+
+This metric is for binary classifications, i.e., both predictions and labels are arrays of 0's and 1's.
+
+[discrete]
+==== Usage:
+
+* Call the update function to add predictions and labels.
+* Get precision score at any point by accessing the value property.
+
+
+=== update()
+`update(preds: ndarray, labels: ndarray) -> None`
+
+Add predictions and labels to be compared.
+
+[discrete]
+==== Parameters:
+preds (ndarray): 
+Array of predicted labels.
+labels (ndarray): 
+Array of true labels.
+
+
+=== value()
+`value() -> float`
+
+Get precision score.
+[discrete]
+==== Returns:
+Precision score (float).
+
+
+== Precision
+
+Recall = stem:[true positives/\sum(true positives + false positives)
+
+This metric is for classification, i.e., both predictions and labels are arrays of multiple whole numbers.
+
+[discrete]
+==== Usage:
+
+* Call the update function to add predictions and labels.
+* Get recall score at any point by accessing the value property.
+
+
+=== value()
+`value() -> Union[dict, float]`
+
+Get precision score for each class.
+[discrete]
+==== Returns:
+Precision score for each class or the average precision if `num_classes` == 2.
+
+
+== MSE
+
+MSE = stem:[\sum(predicted-actual)^2/n]
+
+This metric is for regression tasks, i.e. predicting a n-dimensional vector of float values.
+
+[discrete]
+==== Usage:
+
+* Call the update function to add predictions and labels.
+* Get MSE value at any point by accessing the value property.
+
+
+=== update()
+`update(preds: ndarray, labels: ndarray) -> None`
+
+Add predictions and labels to be compared.
+
+[discrete]
+==== Parameters:
+preds (ndarray): 
+Array of predicted labels.
+labels (ndarray): 
+Array of true labels.
+
+
+=== value()
+`value() -> float`
+
+Get MSE score.
+[discrete]
+==== Returns:
+MSE value (float).
+
+
+== RMSE
+
+RMSE = stem:[\sqrt(\sum(predicted-actual)^2/n)]
+
+This metric is for regression tasks, i.e. predicting a n-dimensional vector of float values.
+
+[discrete]
+==== Usage:
+
+* Call the update function to add predictions and labels.
+* Get RMSE score at any point by accessing the value property.
+
+
+=== value()
+`value() -> float`
+
+Get RMSE value.
+[discrete]
+==== Returns:
+RMSE value (float).
+
+
+== MAE
+
+MAE = stem:[\sum(predicted-actual)/n]
+
+This metric is for regression tasks, i.e. predicting a n-dimensional vector of float values.
+
+[discrete]
+==== Usage:
+
+* Call the update function to add predictions and labels.
+* Get MAE value at any point by accessing the value property.
+
+
+=== update()
+`update(preds: ndarray, labels: ndarray) -> None`
+
+Add predictions and labels to be compared.
+
+[discrete]
+==== Parameters:
+preds (ndarray): 
+Array of predicted labels.
+labels (ndarray): 
+Array of true labels.
+
+
+=== value()
+`value() -> float`
+
+Get MAE score.
+[discrete]
+==== Returns:
+MAE value (float).
+
+
+== HitsAtK
+This metric is used in link prediction tasks, i.e. determining if two vertices have an edge between them.
+Also known as Precsion@K.
+
+[discrete]
+==== Usage:
+
+* Call the update function to add predictions and labels.
+* Get Hits@K value at any point by accessing the value property.
+
+[discrete]
+==== Parameters:
+* `k (int)`: Top k number of entities to compare.
+
+
+=== \__init__()
+`__init__(k: int) -> None`
+
+Instantiate the Hits@K Metric
+[discrete]
+==== Parameter:
+* `k (int)`: Top k number of entities to compare.
+
+
+=== update()
+`update(preds: ndarray, labels: ndarray) -> None`
+
+Add predictions and labels to be compared.
+
+[discrete]
+==== Parameters:
+preds (ndarray): 
+Array of predicted labels.
+labels (ndarray): 
+Array of true labels.
+
+
+=== value()
+`value() -> float`
+
+Get Hits@K score.
+[discrete]
+==== Returns:
+Hits@K value (float).
+
+
+== RecallAtK
+This metric is used in link prediction tasks, i.e. determining if two vertices have an edge between them
+
+[discrete]
+==== Usage:
+
+* Call the update function to add predictions and labels.
+* Get Recall@K value at any point by accessing the value property.
+
+[discrete]
+==== Parameters:
+* `k (int)`: Top k number of entities to compare.
+
+
+=== \__init__()
+`__init__(k: int) -> None`
+
+Instantiate the Recall@K Metric
+[discrete]
+==== Parameter:
+* `k (int)`: Top k number of entities to compare.
+
+
+=== update()
+`update(preds: ndarray, labels: ndarray) -> None`
+
+Add predictions and labels to be compared.
+
+[discrete]
+==== Parameters:
+preds (ndarray): 
+Array of predicted labels.
+labels (ndarray): 
+Array of true labels.
+
+
+=== value()
+`value() -> float`
+
+Get Recall@K score.
+[discrete]
+==== Returns:
+Recall@K value (float).
+
+
+== ClassificationMetrics
+Collects Loss, Accuracy, Precision, Recall, and Confusion Matrix Metrics.
+
+
+=== \__init__()
+`__init__(num_classes: int = 2)`
+
+Instantiate the Classification Metrics collection.
+[discrete]
+==== Parameter:
+* `num_classes (int)`: Number of classes in the classification task.
+
+
+=== reset_metrics()
+`reset_metrics()`
+
+Reset the collection of metrics.
+
+
+=== update_metrics()
+`update_metrics(loss, out, batch, target_type = None)`
+
+Update the metrics collected.
+[discrete]
+==== Parameters:
+loss (float): loss value to update
+out (ndarray): the predictions of the model
+batch (dict): the batch to calculate metrics on
+target_type (str, optional): the type of schema element to calculate the metrics for
+
+
+=== get_metrics()
+`get_metrics()`
+
+Get the metrics collected.
+[discrete]
+==== Returns:
+Dictionary of Accuracy, Precision, Recall, and Confusion Matrix
+
+
+== RegressionMetrics
+Collects Loss, MSE, RMSE, and MAE metrics.
+
+
+=== \__init__()
+`__init__()`
+
+Instantiate the Regression Metrics collection.
+
+
+
+=== reset_metrics()
+`reset_metrics()`
+
+Reset the collection of metrics.
+
+
+=== update_metrics()
+`update_metrics(loss, out, batch, target_type = None)`
+
+Update the metrics collected.
+[discrete]
+==== Parameters:
+loss (float): loss value to update
+out (ndarray): the predictions of the model
+batch (dict): the batch to calculate metrics on
+target_type (str, optional): the type of schema element to calculate the metrics for
+
+
+=== get_metrics()
+`get_metrics()`
+
+Get the metrics collected.
+[discrete]
+==== Returns:
+Dictionary of MSE, RMSE, and MAE.
+
+
+== LinkPredictionMetrics
+
+Collects Loss, Recall@K, and Hits@K metrics.
+
+
+=== \__init__()
+`__init__(k)`
+
+Instantiate the Classification Metrics collection.
+[discrete]
+==== Parameter:
+* `k (int)`: The number of results to look at when calculating metrics.
+
+
+=== reset_metrics()
+`reset_metrics()`
+
+Reset the collection of metrics.
+
+
+=== update_metrics()
+`update_metrics(loss, out, batch, target_type = None)`
+
+Update the metrics collected.
+[discrete]
+==== Parameters:
+loss (float): loss value to update
+out (ndarray): the predictions of the model
+batch (dict): the batch to calculate metrics on
+target_type (str, optional): the type of schema element to calculate the metrics for
+
+
+=== get_metrics()
+`get_metrics()`
+
+Get the metrics collected.
+[discrete]
+==== Returns:
+Dictionary of Recall@K, Hits@K, and K.
+
+

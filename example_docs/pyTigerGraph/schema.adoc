@@ -1,0 +1,78 @@
+= Schema Functions
+
+
+The functions in this page retrieve information about the graph schema.
+All functions in this module are called as methods on a link:https://docs.tigergraph.com/pytigergraph/current/core-functions/base[`TigerGraphConnection` object].
+
+== getSchema()
+`getSchema(udts: bool = True, force: bool = False) -> dict`
+
+Retrieves the schema metadata (of all vertex and edge type and, if not disabled, the
+User-Defined Type details) of the graph.
+
+[discrete]
+==== Parameters:
+* `udts`: If `True`, the output includes User-Defined Types in the schema details.
+* `force`: If `True`, retrieves the schema metadata again, otherwise returns a cached copy of
+the schema metadata (if they were already fetched previously).
+
+[discrete]
+==== Returns:
+The schema metadata.
+
+[discrete]
+==== Endpoint:
+- `GET /gsqlserver/gsql/schema`
+See xref:tigergraph-server:API:built-in-endpoints.adoc#_show_graph_schema_metadata[Show graph schema metadata]
+
+
+== upsertData()
+`upsertData(data: Union[str, object], atomic: bool = False, ackAll: bool = False, newVertexOnly: bool = False, vertexMustExist: bool = False, updateVertexOnly: bool = False) -> dict`
+
+Upserts data (vertices and edges) from a JSON file or a file with equivalent object structure.
+
+[discrete]
+==== Parameters:
+* `data`: The data of vertex and edge instances, in a specific format.
+* `atomic`: The request is an atomic transaction. An atomic transaction means that updates to
+the database contained in the request are all-or-nothing: either all changes are
+successful, or none are successful.
+* `ackAll`: If `True`, the request will return after all GPE instances have acknowledged the
+POST. Otherwise, the request will return immediately after RESTPP processes the POST.
+* `newVertexOnly`: If `True`, the request will only insert new vertices and not update existing ones.
+* `vertexMustExist`: If `True`, the request will only insert an edge if both the `FROM` and `TO` vertices
+of the edge already exist. If the value is `False`, the request will always insert new
+edges and create the necessary vertices with default values for their attributes.
+Note that this parameter does not affect vertices.
+* `updateVertexOnly`: If `True`, the request will only update existing vertices and not insert new
+vertices.
+
+[discrete]
+==== Returns:
+The result of upsert (number of vertices and edges accepted/upserted).
+
+[discrete]
+==== Endpoint:
+- `POST /graph/{graph_name}`
+See xref:tigergraph-server:API:built-in-endpoints.adoc#_upsert_data_to_graph[Upsert data to graph]
+
+
+== getEndpoints()
+`getEndpoints(builtin: bool = False, dynamic: bool = False, static: bool = False) -> dict`
+
+Lists the REST++ endpoints and their parameters.
+
+[discrete]
+==== Parameters:
+* `builtin`: List the TigerGraph-provided REST++ endpoints.
+* `dynamic`: List endpoints for user-installed queries.
+* `static`: List static endpoints.
+
+If none of the above arguments are specified, all endpoints are listed.
+
+[discrete]
+==== Endpoint:
+- `GET /endpoints/{graph_name}`
+See xref:tigergraph-server:API:built-in-endpoints.adoc#_list_all_endpoints[List all endpoints]
+
+

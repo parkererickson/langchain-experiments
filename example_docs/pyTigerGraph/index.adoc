@@ -1,0 +1,44 @@
+= pyTigerGraph
+:description: Overview of pyTigerGraph.
+
+pyTigerGraph is a Python package for connecting to TigerGraph databases.
+We offer two versions of the package: _pyTigerGraph_ and _pyTigerGraph[gds]_.
+
+_pyTigerGraph_ is the default version and contains the core functionality of pyTigerGraph, including the following:
+
+* Data manipulation functions:inserting, updating, upserting, deleting, and retrieving vertices and edges.
+* Query functions: running and managing xref:gsql-ref:querying:query-operations.adoc[queries] inside the TigerGraph
+  database
+* Metadata functions: fetching details of graphs/schemas, vertex and edge types, and other
+  schema objects and object types
+* Authentication and authorization functions
+* Miscellaneous utility functions
+
+The _pyTigerGraph[gds]_ version of pyTigerGraph is a drop-in replacement for _pyTigerGraph_,
+but adds support for Graph Data Science and Graph machine learning capabilities.
+This includes:
+
+* Graph feature engineering using algorithms from the xref:graph-ml:intro:[GSQL Graph Data Science Library].
+* Data loaders for training and inference of Graph Neural Network (GNN) models using PyTorch Geometric and DGL.
+* Machine learning utilities for splitting vertices into training, validation, and testing sets.
+
+== Getting Started
+Checkout the xref:getting-started:index.adoc[Getting Started] section for a quick introduction to pyTigerGraph.
+It walks you through how to perform the following:
+
+* xref:getting-started:install.adoc[]
+* xref:getting-started:connection.adoc[]
+
+In addition, we also provide a video tutorial and a Google Colab notebook that walks you through all core functions of pyTigergraph:
+
+* xref:getting-started:101.adoc[]
+
+== pyTigerGraph Community
+There are many community resources that you can use for help and support using pyTigerGraph:
+
+* https://dev.tigergraph.com/forum/[TigerGraph Community Forum]
+* https://discord.gg/XM7Cn9w[TigerGraph Community Discord]
+* https://github.com/tigergraph/pyTigerGraph/issues[pyTigerGraph GitHub Issues]
+
+== Contributing
+Checkout the xref:contributing:index.adoc[Contributing] section for instructions on how to contribute. pyTigerGraph was started as an open-source community project, and we welcome contributions from the community.

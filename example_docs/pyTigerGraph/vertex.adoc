@@ -1,0 +1,466 @@
+= Vertex Functions
+
+
+Functions to upsert, retrieve and delete vertices.
+
+All functions in this module are called as methods on a link:https://docs.tigergraph.com/pytigergraph/current/core-functions/base[`TigerGraphConnection` object].
+
+== getVertexTypes()
+`getVertexTypes(force: bool = False) -> list`
+
+Returns the list of vertex type names of the graph.
+
+[discrete]
+==== Parameter:
+* `force`: If `True`, forces the retrieval the schema metadata again, otherwise returns a
+cached copy of vertex type metadata (if they were already fetched previously).
+
+[discrete]
+==== Returns:
+The list of vertex types defined in the current graph.
+
+
+== getVertexAttrs()
+`getVertexAttrs(vertexType: str) -> list`
+
+Returns the names and types of the attributes of the vertex type.
+
+[discrete]
+==== Parameter:
+* `vertexType`: The name of the vertex type.
+
+[discrete]
+==== Returns:
+A list of (attribute_name, attribute_type) tuples.
+The format of attribute_type is one of
+- "scalar_type"
+- "complex_type(scalar_type)"
+- "map_type(key_type,value_type)"
+and it is a string.
+
+
+== getVertexType()
+`getVertexType(vertexType: str, force: bool = False) -> dict`
+
+Returns the details of the specified vertex type.
+
+[discrete]
+==== Parameters:
+* `vertexType`: The name of the vertex type.
+* `force`: If `True`, forces the retrieval the schema metadata again, otherwise returns a
+cached copy of vertex type details (if they were already fetched previously).
+
+[discrete]
+==== Returns:
+The metadata of the vertex type.
+
+
+== getVertexCount()
+`getVertexCount(vertexType: Union[str, list] = "*", where: str = "", realtime: bool = False) -> Union[int, dict]`
+
+Returns the number of vertices of the specified type.
+
+[discrete]
+==== Parameters:
+* `vertexType (Union[str, list], optional)`: The name of the vertex type. If `vertexType` == "&#42;", then count the instances of all 
+vertex types (`where` cannot be specified in this case). Defaults to "&#42;".
+* `where (str, optional)`: A comma separated list of conditions that are all applied on each vertex's
+attributes. The conditions are in logical conjunction (i.e. they are "AND'ed"
+together). Defaults to "".
+* `realtime (bool, optional)`: Whether to get the most up-to-date number by force. When there are frequent updates happening, 
+a slightly outdated number (up to 30 seconds delay) might be fetched. Set `realtime=True` to
+force the system to recount the vertices, which will get a more up-to-date result but will
+also take more time. This parameter only works with TigerGraph DB 3.6 and above.
+Defaults to False.
+
+[discrete]
+==== Returns:
+- A dictionary of <vertex_type>: <vertex_count> pairs if `vertexType` is a list or "&#42;".
+- An integer of vertex count if `vertexType` is a single vertex type.
+
+[discrete]
+==== Uses:
+- If `vertexType` is specified only: count of the instances of the given vertex type(s).
+- If `vertexType` and `where` are specified: count of the instances of the given vertex
+type after being filtered by `where` condition(s).
+
+[discrete]
+==== Raises:
+`TigerGraphException` when "&#42;" is specified as vertex type and a `where` condition is
+provided; or when invalid vertex type name is specified.
+
+[discrete]
+==== Endpoints:
+- `GET /graph/{graph_name}/vertices`
+See xref:tigergraph-server:API:built-in-endpoints.adoc#_list_vertices[List vertices]
+- `POST /builtins`
+See xref:tigergraph-server:API:built-in-endpoints.adoc#_run_built_in_functions_on_graph[Run built-in functions]
+
+
+== upsertVertex()
+`upsertVertex(vertexType: str, vertexId: str, attributes: dict = None) -> int`
+
+Upserts a vertex.
+
+Data is upserted:
+
+- If vertex is not yet present in graph, it will be created.
+- If it's already in the graph, its attributes are updated with the values specified in
+the request. An optional operator controls how the attributes are updated.
+
+[discrete]
+==== Parameters:
+* `vertexType`: The name of the vertex type.
+* `vertexId`: The primary ID of the vertex to be upserted.
+* `attributes`: The attributes of the vertex to be upserted; a dictionary in this format: +
+
++
+[source,indent=0]
+----
+            {<attribute_name>: <attribute_value>|(<attribute_name>, <operator>), …}
+----
+
++
+Example:
++
+[source,indent=0]
+----
+            {"name": "Thorin", points: (10, "+"), "bestScore": (67, "max")}
+----
+
+For valid values of `<operator>` see xref:tigergraph-server:API:built-in-endpoints.adoc#_operation_codes[Operation codes].
+
+[discrete]
+==== Returns:
+A single number of accepted (successfully upserted) vertices (0 or 1).
+
+[discrete]
+==== Endpoint:
+- `POST /graph/{graph_name}`
+See xref:tigergraph-server:API:built-in-endpoints.adoc#_upsert_data_to_graph[Upsert data to graph]
+
+
+== upsertVertices()
+`upsertVertices(vertexType: str, vertices: list) -> int`
+
+Upserts multiple vertices (of the same type).
+
+See the description of ``upsertVertex`` for generic information.
+
+[discrete]
+==== Parameters:
+* `vertexType`: The name of the vertex type.
+* `vertices`: A list of tuples in this format: +
+
+[source.wrap,json]
+----
+[
+(<vertex_id>, {<attribute_name>: <attribute_value>, …}),
+(<vertex_id>, {<attribute_name>: (<attribute_value>, <operator>), …}),
+⋮
+]
+----
+
++
+Example:
+[source.wrap, json]
+----
+[
+(2, {"name": "Balin", "points": (10, "+"), "bestScore": (67, "max")}),
+(3, {"name": "Dwalin", "points": (7, "+"), "bestScore": (35, "max")})
+]
+----
+
+For valid values of `<operator>` see xref:tigergraph-server:API:built-in-endpoints.adoc#_operation_codes[Operation codes].
+
+[discrete]
+==== Returns:
+A single number of accepted (successfully upserted) vertices (0 or positive integer).
+
+[discrete]
+==== Endpoint:
+- `POST /graph/{graph_name}`
+See xref:tigergraph-server:API:built-in-endpoints.adoc#_upsert_data_to_graph[Upsert data to graph]
+
+
+== upsertVertexDataFrame()
+`upsertVertexDataFrame(df: pd.DataFrame, vertexType: str, v_id: bool = None, attributes: dict = None) -> int`
+
+Upserts vertices from a Pandas DataFrame.
+
+[discrete]
+==== Parameters:
+* `df`: The DataFrame to upsert.
+* `vertexType`: The type of vertex to upsert data to.
+* `v_id`: The field name where the vertex primary id is given. If omitted the dataframe index
+would be used instead.
+* `attributes`: A dictionary in the form of `{target: source}` where source is the column name in
+the dataframe and target is the attribute name in the graph vertex. When omitted,
+all columns would be upserted with their current names. In this case column names
+must match the vertex's attribute names.
+
+[discrete]
+==== Returns:
+The number of vertices upserted.
+
+
+== getVertices()
+`getVertices(vertexType: str, select: str = "", where: str = "", limit: Union[int, str] = None, sort: str = "", fmt: str = "py", withId: bool = True, withType: bool = False, timeout: int = 0) -> Union[dict, str, pd.DataFrame]`
+
+Retrieves vertices of the given vertex type.
+
+*Note*:
+The primary ID of a vertex instance is NOT an attribute, thus cannot be used in
+`select`, `where` or `sort` parameters (unless the `WITH primary_id_as_attribute` clause
+was used when the vertex type was created). +
+Use `getVerticesById()` if you need to retrieve vertices by their primary ID.
+
+[discrete]
+==== Parameters:
+* `vertexType`: The name of the vertex type.
+* `select`: Comma separated list of vertex attributes to be retrieved.
+* `where`: Comma separated list of conditions that are all applied on each vertex' attributes.
+The conditions are in logical conjunction (i.e. they are "AND'ed" together).
+* `sort`: Comma separated list of attributes the results should be sorted by.
+Must be used with `limit`.
+* `limit`: Maximum number of vertex instances to be returned (after sorting).
+Must be used with `sort`.
+* `fmt`: Format of the results: +
+- "py":   Python objects
+- "json": JSON document
+- "df":   pandas DataFrame
+* `withId`: (When the output format is "df") should the vertex ID be included in the dataframe?
+* `withType`: (When the output format is "df") should the vertex type be included in the dataframe?
+* `timeout`: Time allowed for successful execution (0 = no limit, default).
+
+[discrete]
+==== Returns:
+The (selected) details of the (matching) vertex instances (sorted, limited) as
+dictionary, JSON or pandas DataFrame.
+
+[discrete]
+==== Endpoint:
+- `GET /graph/{graph_name}/vertices/{vertex_type}`
+See xref:tigergraph-server:API:built-in-endpoints.adoc#_list_vertices[List vertices]
+
+
+== getVertexDataFrame()
+`getVertexDataFrame(vertexType: str, select: str = "", where: str = "", limit: Union[int, str] = None, sort: str = "", timeout: int = 0) -> pd.DataFrame`
+
+Retrieves vertices of the given vertex type and returns them as pandas DataFrame.
+
+This is a shortcut to `getVertices(..., fmt="df", withId=True, withType=False)`.
+
+*Note*:
+The primary ID of a vertex instance is NOT an attribute, thus cannot be used in
+`select`, `where` or `sort` parameters (unless the `WITH primary_id_as_attribute` clause
+was used when the vertex type was created). +
+Use `getVerticesById()` if you need to retrieve vertices by their primary ID.
+
+[discrete]
+==== Parameters:
+* `vertexType`: The name of the vertex type.
+* `select`: Comma separated list of vertex attributes to be retrieved.
+* `where`: Comma separated list of conditions that are all applied on each vertex' attributes.
+The conditions are in logical conjunction (i.e. they are "AND'ed" together).
+* `sort`: Comma separated list of attributes the results should be sorted by.
+Must be used with 'limit'.
+* `limit`: Maximum number of vertex instances to be returned (after sorting).
+Must be used with `sort`.
+* `timeout`: Time allowed for successful execution (0 = no limit, default).
+
+[discrete]
+==== Returns:
+The (selected) details of the (matching) vertex instances (sorted, limited) as pandas
+DataFrame.
+
+
+== getVertexDataframe()
+`getVertexDataframe(vertexType: str, select: str = "", where: str = "", limit: Union[int, str] = None, sort: str = "", timeout: int = 0) -> pd.DataFrame`
+
+DEPRECATED
+
+Use `getVertexDataFrame()` instead.
+
+
+== getVerticesById()
+`getVerticesById(vertexType: str, vertexIds: Union[int, str, list], select: str = "", fmt: str = "py", withId: bool = True, withType: bool = False, timeout: int = 0) -> Union[list, str, pd.DataFrame]`
+
+Retrieves vertices of the given vertex type, identified by their ID.
+
+[discrete]
+==== Parameters:
+* `vertexType`: The name of the vertex type.
+* `vertexIds`: A single vertex ID or a list of vertex IDs.
+* `select`: Comma separated list of vertex attributes to be retrieved.
+* `fmt`: Format of the results: +
+"py":   Python objects (in a list)
+"json": JSON document
+"df":   pandas DataFrame
+* `withId`: (If the output format is "df") should the vertex ID be included in the dataframe?
+* `withType`: (If the output format is "df") should the vertex type be included in the dataframe?
+* `timeout`: Time allowed for successful execution (0 = no limit, default).
+
+[discrete]
+==== Returns:
+The (selected) details of the (matching) vertex instances as dictionary, JSON or pandas
+DataFrame.
+
+[discrete]
+==== Endpoint:
+- `GET /graph/{graph_name}/vertices/{vertex_type}/{vertex_id}`
+See xref:tigergraph-server:API:built-in-endpoints.adoc#_retrieve_a_vertex[Retrieve a vertex]
+
+
+
+== getVertexDataFrameById()
+`getVertexDataFrameById(vertexType: str, vertexIds: Union[int, str, list], select: str = "") -> pd.DataFrame`
+
+Retrieves vertices of the given vertex type, identified by their ID.
+
+This is a shortcut to ``getVerticesById(..., fmt="df", withId=True, withType=False)``.
+
+[discrete]
+==== Parameters:
+* `vertexType`: The name of the vertex type.
+* `vertexIds`: A single vertex ID or a list of vertex IDs.
+* `select`: Comma separated list of vertex attributes to be retrieved.
+
+[discrete]
+==== Returns:
+The (selected) details of the (matching) vertex instances as pandas DataFrame.
+
+
+== getVertexDataframeById()
+`getVertexDataframeById(vertexType: str, vertexIds: Union[int, str, list], select: str = "") -> pd.DataFrame`
+
+DEPRECATED
+
+Use `getVertexDataFrameById()` instead.
+
+
+== getVertexStats()
+`getVertexStats(vertexTypes: Union[str, list], skipNA: bool = False) -> dict`
+
+Returns vertex attribute statistics.
+
+[discrete]
+==== Parameters:
+* `vertexTypes`: A single vertex type name or a list of vertex types names or "&#42;" for all vertex
+types.
+* `skipNA`: Skip those non-applicable vertices that do not have attributes or none of their
+attributes have statistics gathered.
+
+[discrete]
+==== Returns:
+A dictionary of various vertex stats for each vertex type specified.
+
+[discrete]
+==== Endpoint:
+- `POST /builtins/{graph_name}`
+See xref:tigergraph-server:API:built-in-endpoints.adoc#_run_built_in_functions_on_graph[Run built-in functions]
+
+
+== delVertices()
+`delVertices(vertexType: str, where: str = "", limit: str = "", sort: str = "", permanent: bool = False, timeout: int = 0) -> int`
+
+Deletes vertices from graph.
+
+*Note*:
+The primary ID of a vertex instance is not an attribute. A primary ID cannot be used in
+`select`, `where` or `sort` parameters (unless the `WITH primary_id_as_attribute` clause
+was used when the vertex type was created). +
+Use `delVerticesById()` if you need to retrieve vertices by their primary ID.
+
+[discrete]
+==== Parameters:
+* `vertexType`: The name of the vertex type.
+* `where`: Comma separated list of conditions that are all applied on each vertex' attributes.
+The conditions are in logical conjunction (i.e. they are "AND'ed" together).
+* `sort`: Comma separated list of attributes the results should be sorted by.
+Must be used with `limit`.
+* `limit`: Maximum number of vertex instances to be returned (after sorting).
+Must be used with `sort`.
+* `permanent`: If true, the deleted vertex IDs can never be inserted back, unless the graph is
+dropped or the graph store is cleared.
+timeout:
+Time allowed for successful execution (0 = no limit, default).
+
+[discrete]
+==== Returns:
+A single number of vertices deleted.
+
+The primary ID of a vertex instance is NOT an attribute, thus cannot be used in above
+arguments.
+
+[discrete]
+==== Endpoint:
+- `DELETE /graph/{graph_name}/vertices/{vertex_type}`
+See xref:tigergraph-server:API:built-in-endpoints.adoc#_delete_vertices[Delete vertices]
+
+
+== delVerticesById()
+`delVerticesById(vertexType: str, vertexIds: Union[int, str, list], permanent: bool = False, timeout: int = 0) -> int`
+
+Deletes vertices from graph identified by their ID.
+
+[discrete]
+==== Parameters:
+* `vertexType`: The name of the vertex type.
+* `vertexIds`: A single vertex ID or a list of vertex IDs.
+* `permanent`: If true, the deleted vertex IDs can never be inserted back, unless the graph is
+dropped or the graph store is cleared.
+* `timeout`: Time allowed for successful execution (0 = no limit, default).
+
+[discrete]
+==== Returns:
+A single number of vertices deleted.
+
+[discrete]
+==== Endpoint:
+- `DELETE /graph/{graph_name}/vertices/{vertex_type}/{vertex_id}`
+See xref:tigergraph-server:API:built-in-endpoints.adoc#_delete_a_vertex[Delete a vertex]
+
+
+== vertexSetToDataFrame()
+`vertexSetToDataFrame(vertexSet: list, withId: bool = True, withType: bool = False) -> pd.DataFrame`
+
+Converts a vertex set to Pandas DataFrame.
+
+Vertex sets are used for both the input and output of `SELECT` statements. They contain
+instances of vertices of the same type.
+For each vertex instance, the vertex ID, the vertex type and the (optional) attributes are
+present under the `v_id`, `v_type` and `attributes` keys, respectively. +
+See an example in `edgeSetToDataFrame()`.
+
+A vertex set has this structure (when serialised as JSON):
+[source.wrap,json]
+----
+[
+{
+"v_id": <vertex_id>,
+"v_type": <vertex_type_name>,
+"attributes":
+{
+"attr1": <value1>,
+"attr2": <value2>,
+⋮
+}
+},
+⋮
+]
+----
+For more information on vertex sets see xref:gsql-ref:querying:declaration-and-assignment-statements.adoc#_vertex_set_variables[Vertex set variables].
+
+[discrete]
+==== Parameters:
+* `vertexSet`: A JSON array containing a vertex set in the format returned by queries (see below).
+* `withId`: Whether to include vertex primary ID as a column.
+* `withType`: Whether to include vertex type info as a column.
+
+[discrete]
+==== Returns:
+A pandas DataFrame containing the vertex attributes (and optionally the vertex primary
+ID and type).
+
+

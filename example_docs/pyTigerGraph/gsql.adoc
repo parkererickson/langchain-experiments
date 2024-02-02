@@ -1,0 +1,58 @@
+= GSQL Interface
+
+
+Use GSQL within pyTigerGraph.
+All functions in this module are called as methods on a link:https://docs.tigergraph.com/pytigergraph/current/core-functions/base[`TigerGraphConnection` object].
+
+== gsql()
+`gsql(query: str, graphname: str = None, options = None) -> Union[str, dict]`
+
+Runs a GSQL query and processes the output.
+
+[discrete]
+==== Parameters:
+* `query`: The text of the query to run as one string. The query is one or more GSQL statement.
+* `graphname`: The name of the graph to attach to. If not specified, the graph name provided at the
+time of establishing the connection will be used.
+* `options`: DEPRECATED
+
+[discrete]
+==== Returns:
+The output of the statement(s) executed.
+
+
+== installUDF()
+`installUDF(ExprFunctions: str = "", ExprUtil: str = "") -> None`
+
+Install user defined functions (UDF) to the database.
+ +
+See https://docs.tigergraph.com/gsql-ref/current/querying/func/query-user-defined-functions[this] for more details. for details on UDFs.
+
+[discrete]
+==== Parameters:
+* `ExprFunctions (str, optional)`: Path or URL to the file for ExprFunctions. Defaults to '' (a blank path/URL).
+* `ExprUtil (str, optional)`: Path or URL to the file for ExprUtil. Defaults to '' (a blank path/URL).
+
+[discrete]
+==== Returns:
+Status of the installation.
+
+
+== getUDF()
+`getUDF(ExprFunctions: bool = True, ExprUtil: bool = True) -> Union[str, Tuple[str, str]]`
+
+Get user defined functions (UDF) installed in the database.
+ +
+See https://docs.tigergraph.com/gsql-ref/current/querying/func/query-user-defined-functions[this] for more details. for details on UDFs.
+
+[discrete]
+==== Parameters:
+* `ExprFunctions (bool, optional)`: Whether to get ExprFunctions. Defaults to True.
+* `ExprUtil (bool, optional)`: Whether to get ExprUtil. Defaults to True.
+
+[discrete]
+==== Returns:
+str: If only one of `ExprFunctions` or `ExprUtil` is True, return of the content of that file.
+Tuple[str, str]: content of ExprFunctions and content of ExprUtil.
+
+

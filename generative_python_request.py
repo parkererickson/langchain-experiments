@@ -66,15 +66,14 @@ def generate_answer(question):
     for doc in docs:
         print(doc)
     print()
-    inputs = [{"context": doc.page_content, 
-                "question": restate_q, 
+    inputs = {"question": restate_q, 
                 "vertices": conn.getVertexTypes(), 
                 "edges": conn.getEdgeTypes(), 
                 "queries": {"get_papers_of_author": {"auth": "<INSERT_ID_HERE>"},
                             "get_number_of_papers_for_author": {"auth": "<INSERT_ID_HERE>"},
                             "author_institutions": {"auth_id": "<INSERT_ID_HERE>"},
                             "num_authors_at_institution": {"inst": "<INSERT_ID_HERE>"}
-                            }} for doc in docs]
+                            }}
     generated = chain.apply(inputs)[0]["text"]
     loc = {}
     try:
